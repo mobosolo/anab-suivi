@@ -64,6 +64,20 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   });
 
   const studentEmail = (dossier as any).users?.email;
+  const statusLabel = {
+    cree: "Dossier créé",
+    recu_ambassade: "Reçu par l'ambassade",
+    transmis_anab: "Transmis à l'ANAB",
+    en_examen: "En cours d'examen",
+    decision_favorable: "Bourse accordée",
+    decision_defavorable: "Rejeté",
+  }[nextStatus];
+  await supabase.from("notifications").insert({
+    user_id: dossier.student_id,
+    dossier_id: params.id,
+    message: `Votre dossier ${dossier.tracking_number} est passé au statut : ${statusLabel}.${motif ? ` Motif : ${motif}` : ""}`,
+    channel: "in_app",
+  });
   if (studentEmail) {
     await sendStatusEmail({
       to: studentEmail,

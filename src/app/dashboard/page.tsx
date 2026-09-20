@@ -37,6 +37,13 @@ export default async function DashboardPage() {
     .eq("dossier_id", dossier.id)
     .order("changed_at", { ascending: true });
 
+  const { data: notifications } = await supabase
+    .from("notifications")
+    .select("id, message, sent_at, read_at")
+    .eq("user_id", user.id)
+    .order("sent_at", { ascending: false })
+    .limit(10);
+
   return (
     <main className="min-h-screen p-4 max-w-lg mx-auto">
       <div className="bg-greenDeep text-white rounded-2xl px-5 py-5 mb-4">
@@ -72,6 +79,19 @@ export default async function DashboardPage() {
         <h2 className="font-head font-bold text-sm mb-3">Progression du dossier</h2>
         <StatusTimeline currentStatus={dossier.status as DossierStatus} history={(history as any) ?? []} />
       </div>
+
+      {notifications && notifications.length > 0 && (
+        <div className="bg-surface border border-line rounded-2xl p-4 mt-4">
+          <h2 className="font-head font-bold text-sm mb-3">Notifications</h2>
+          <div className="space-y-2">
+            {notifications.map((notification) => (
+              <div key={notification.id} className="bg-surfaceSoft rounded-lg p-3 text-sm text-inkSoft">
+                {notification.message}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

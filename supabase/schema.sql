@@ -163,6 +163,15 @@ create policy "status_history_agent_insert" on status_history for insert
 -- Notifications : chacun voit les siennes
 create policy "notifications_select_own" on notifications for select using (user_id = auth.uid());
 
+create policy "notifications_agent_insert" on notifications for insert
+  with check (
+    exists (
+      select 1 from users u
+      where u.id = auth.uid()
+        and u.role in ('agent_embassy', 'agent_anab')
+    )
+  );
+
 -- Tables de référence : lecture publique (authentifié), pas d'écriture via l'app
 alter table countries enable row level security;
 alter table establishments enable row level security;
